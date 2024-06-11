@@ -1,0 +1,183 @@
+/* *-*-*-*-*-*-*-*-*-*-* / Fonts  *-*-*-*-*-*-*-*-*-*-* */
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700;800;900&family=Roboto:wght@100;300;400;500;700;900&display=swap');
+/* *-*-*-*-*-*-*-*-*-*-*  Fonts / *-*-*-*-*-*-*-*-*-*-* */
+/* *-*-*-*-*-*-*-*-*-*-* / theme variables  *-*-*-*-*-*-*-*-*-*-* */
+$white:                 #fff;
+$black:                 #000;
+$light-cf-black:        #b2b2b2;
+$grey-clr:              #d2d2d2;
+$header-text:           #041e41;
+$footer-text:           #414141;
+$body-text-clr:         #373d49;
+$body-text-clr-hover:   #3d434f;
+$body-bold-clr:         #6d6d6d;
+$cf-primary-blue:       #00aeef;
+$cf-primary-blue-hover: #0290c3;
+$cf-dark-clr:           #041e41;
+$cf-dropdown-clr:       #0f6b8e;
+$cf-dropdown-hover:     #0088bb;
+$prtfolio-btn:          #1dafec;
+$strategic-blu:         #287fb9;
+$paleBlue:              #cdeaff;
+$trans:                   transparent;
+$cflightBlue:           #e5f8ff;
+$cf-tollBg:             #15a086;
+$cf-localBg:            #96b94f;
+$cf-alert:              #a94442;
+$gray91:                #eee;
+$gray92:                #ebebec;
+$gray94:                #f0f0f0;
+$gray98:                #fafafa;
+$gray99:                #f3f3f3;
+$gray80:                #ccc;
+$gray84:                #d6d6d6;
+$gray85:                #b6b6b6;
+$charcoal:              #333;
+$charcoal2:             #464646;
+$card-text:             #666;
+$regal-blue:            #183050;
+$detail-body-clr:       #424141;
+$davy-gray:             #555555;
+$concrete:              #d7d8da;
+$mercury:               #e6e6e6;
+$whitesmoke:            #f9f9f9;
+$aliceblu:              #e5f8ff;
+$services-body:         #f0f0f0;
+$design-hover:          #15a086;
+$development_red:       #c03b2a;
+$marketing_orng:        #f2981f;
+$darkSlate:             #2c5074;
+$warning:               #fcf8e3;
+$danger:                #f2dede;
+
+$fb-bg:                 #3b5999;
+$twtr-bg:               #00aced;
+$linked-bg:             #007bb6;
+$ytube-bg:              #bb0000;
+$vmo-bg:                #1ab7ea;
+
+$roboto: 'Roboto';
+$mont: 'Montserrat';
+/* *-*-*-*-*-*-*-*-*-* theme variables ends / *-*-*-*-*-*-*-*-*-* */
+
+/* *-*-*-*-*-*-*-*-*-*-*-*-*-* / mixins starts *-*-*-*-*-*-*-*-*-*-*-*-* */
+@mixin container {
+  max-width: 1366px;
+  @include m-auto();
+}
+@mixin full-width {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+@mixin zero-spacings {
+  margin: 0 !important;
+  padding: 0;
+}
+@mixin m-auto {
+  margin-inline: auto;
+}
+@mixin bordered-btn {
+  border: 2px solid $black;
+  padding: 8px 15px;
+  border-radius: 5px;
+}
+@mixin cf-btn {
+  box-sizing: border-box;
+  position: relative;
+  overflow: hidden;
+  text-decoration: none;
+  border: 2px solid $white;
+  color: $white;
+  display: inline-block;
+  max-width: 100%;
+  background: $trans;
+  font-size: 16px;
+  font-family: $roboto;
+  font-weight: 700;
+  border-radius: 4px;
+  padding: 18px 30px;
+  -webkit-box-shadow: inset 0px 0px 0px 1px $white;
+  -moz-box-shadow: inset 0px 0px 0px 1px $white;
+  box-shadow: inset 0px 0px 0px 1px $white;
+  text-transform: uppercase;
+  transition: color .1s ease-in-out,
+              background .1s ease-in-out,
+              border .1s ease-in-out;
+  -webkit-transition: color .1s ease-in-out,
+                      background .1s ease-in-out,
+                      border .1s ease-in-out;
+  &:hover {
+    span {
+      color: $cf-primary-blue;
+      -webkit-text-fill-color: $cf-primary-blue;
+    }
+    &::after {
+      width: 100%;
+      height: 4000%;
+      opacity: 1;
+    }
+  }
+  span {
+    position: relative;
+    z-index: 2;
+  }
+  &::after {
+    content: "";
+    position: absolute;
+    transition: all .2s ease-out;
+    -webkit-transition: all .2s ease-out;
+    left: 50%;
+    top: 50%;
+    transform: translateX(-50%) translateY(-50%) rotate(45deg) translateZ(0);
+    -webkit-transform: translateX(-50%) translateY(-50%) rotate(45deg) translateZ(0);
+    -ms-transform: translateX(-50%) translateY(-50%) rotate(45deg) translateZ(0);
+    height: 0;
+    width: 0;
+    opacity: 0;
+    background-color: $white;
+  }
+}
+@mixin cf-dark-btn {
+  border-color: $header-text;
+  padding: 8px 15px;
+  color: $header-text;
+  &:hover {
+    border-color: $header-text;
+    span {
+      color: $white;
+      -webkit-text-fill-color: $white;
+    }
+  }
+  &::after {
+    background-color: $header-text;
+  }
+}
+@mixin cf-home-btn {
+  border: 2px solid $cf-primary-blue;
+  padding: 8px 15px;
+  color: $white;
+  background: $cf-primary-blue;
+  -webkit-box-shadow: inset 0px 0px 0px 1px $cf-primary-blue;
+  -moz-box-shadow: inset 0px 0px 0px 1px $cf-primary-blue;
+  box-shadow: inset 0px 0px 0px 1px $cf-primary-blue;
+  &:hover {
+    border-color: $cf-dropdown-hover;
+    span {
+      color: $white;
+      -webkit-text-fill-color: $white;
+    }
+  }
+  &::after {
+    background-color: $cf-dropdown-hover;
+  }
+}
+@mixin portfolio-container {
+  max-width: 1240px !important;
+}
+@mixin small-desktop {
+  max-width: 1300px !important;
+}
+@mixin w-3rd {
+  width: 35%;
+}
+/* *-*-*-*-*-*-*-*-*-*-*-*-*-* mixins ends / *-*-*-*-*-*-*-*-*-*-*-*-*-* */

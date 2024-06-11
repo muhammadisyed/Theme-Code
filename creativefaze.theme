@@ -1,0 +1,207 @@
+<?php
+
+/**
+ * @file
+ * Bootstrap sub-theme.
+ *
+ * Place your custom PHP code in this file.
+ */
+
+function creativefaze_theme_suggestions_form_element_label_alter(array &$suggestions, array $variables, $hook) {
+  if (isset($variables['element']['#is_checkbox']) && $variables['element']['#is_checkbox']) {
+    $suggestions[] = $hook . '__checkbox';
+  }
+}
+
+function creativefaze_preprocess_node(array &$variables) {
+  $variables['next'] = NULL;
+  $variables['prev'] = NULL;
+  if ($node = \Drupal::routeMatch()->getParameter('node')) {
+    $types = ['blogs', 'portfolio'];
+    if (in_array($node->getType(), $types)) {
+      $node_type = $variables['node']->getType();
+      if (creativefaze_next_prev("next", $node_type)) {
+        $nid = creativefaze_next_prev("next", $node_type);
+        $path = \Drupal::service('path_alias.manager')->getAliasByPath('/node/' . $nid);
+        $variables['next'] = $path;
+      }
+      if (creativefaze_next_prev("prev", $node_type)) {
+        $nid = creativefaze_next_prev("prev", $node_type);
+        $path = \Drupal::service('path_alias.manager')->getAliasByPath('/node/' . $nid);
+        $variables['prev'] = $path;
+      }
+    }
+  }
+}
+
+function creativefaze_next_prev($dir, $type) {
+  $nid = \Drupal::routeMatch()->getRawParameter('node');
+  $operator = $dir == 'next' ? '<' : '>';
+  $order = $dir == 'next' ? 'DESC' : 'ASC';
+  $database = \Drupal::database();
+  $query = $database->select('node_field_data', 'nfd')
+          ->fields('nfd', ['nid'])
+          ->condition('nfd.type', $type)
+          ->condition('nfd.status', 1)
+          ->condition('nfd.nid', $nid, $operator)
+          ->orderBy('nfd.created', $order)
+          ->range(0, 1);
+
+  if ($type === 'portfolio') {
+    $operator = $dir == 'next' ? '>' : '<';
+    $order = $dir == 'next' ? 'ASC' : 'DESC';
+    $query = $database->select('node_field_data', 'nfd');
+    $query->innerJoin('draggableviews_structure', 'ds', 'ds.entity_id=nfd.nid');
+    $query->fields('nfd', ['nid']);
+    $query->condition('nfd.type', $type);
+    $query->condition('nfd.status', 1);
+    $query->condition('ds.view_name', $type);
+    $query->condition('ds.view_display', 'page_1');
+
+    $subquery = $database->select('draggableviews_structure', 'dds')
+              ->fields('dds', ['weight'])
+              ->condition('dds.view_name', $type)
+              ->condition('dds.view_display', 'page_1')
+              ->condition('dds.entity_id', $nid);
+
+    $query->condition('ds.weight', $subquery, $operator);
+    $query->orderBy('ds.weight', $order);
+    $query->range(0, 1);
+  }
+  $query = $query->execute();
+  return $query->fetchField();
+}
+
+function creativefaze_theme_suggestions_views_view_alter(array &$suggestions, array $variables, $hook) {
+  $suggestions[] = $hook . '__' . $variables['view']->id();
+  $suggestions[] = $hook . '__' . $variables['view']->getDisplay()->getPluginId() . '__' . $variables['view']->id();
+  $suggestions[] = $hook . '__' . $variables['view']->current_display . '__' . $variables['view']->id();
+}
+
+function creativefaze_preprocess_paragraph(array &$variables) {
+  $variables['tab_active'] = FALSE;
+  if ($node = \Drupal::routeMatch()->getParameter('node')) {
+    $paragraph = $variables['elements']['#paragraph'];
+    if ($node->getType() === 'page' && $paragraph->getType() === 'link_tabs') {
+      $current_path = \Drupal::service('path.current')->getPath();
+      $current_alias = \Drupal::service('path_alias.manager')->getAliasByPath($current_path);
+      if ($paragraph->get('field_link')->getValue()) {
+        $uri = explode(':', $paragraph->get('field_link')->getValue()[0]['uri']);
+        $link_field_uri_alias = $uri[1];
+        if ($uri[0] === 'entity') {
+          $link_field_uri_alias = \Drupal::service('path_alias.manager')->getAliasByPath('/'.$uri[1]);
+        }
+        if ($current_alias === $link_field_uri_alias) {
+          $variables['tab_active'] = TRUE;
+        }
+      }
+    }
+  }
+}
+
+function creativefaze_theme_suggestions_image_alter(array &$suggestions, array $variables, $hook) {
+  if (isset($variables['uri']) && strpos($variables['uri'], 'video_thumbnails')) {
+    $suggestions[] = $hook . '__video_thumbnail';
+  }
+}
+
+function creativefaze_preprocess_file_video(array &$variables) {
+  $attributes = $variables['attributes'];
+  $attributes->setAttribute('muted', TRUE);
+  $attributes->setAttribute('controls', FALSE);
+}
+
+function creativefaze_preprocess_page(array &$variables) {
+  $variables['cf_body_class'] = null;
+  $variables['transparent_header'] = FALSE;
+  if ($node = \Drupal::routeMatch()->getParameter('node')) {
+    if ($node->getType() === 'page') {
+      if ($node->get('field_body_class')->value) {
+        $variables['cf_body_class'] = $node->get('field_body_class')->value;
+      }
+      $variables['transparent_header'] = (bool) $node->get('field_tranparent_header')->value;
+    }
+    if ($node->getType() === 'portfolio') {
+      $variables['transparent_header'] = TRUE;
+    }
+  }
+}
+
+function creativefaze_preprocess_region(array &$variables) {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  $variables['sitemap_title'] = $route_name === 'sitemap.page';
+}
+
+function creativefaze_preprocess_html(array &$variables) {
+  $user_roles = \Drupal::currentUser()->getRoles();
+  $last_role = end($user_roles);
+  $variables['user_role'] = $last_role;
+}
+
+function creativefaze_preprocess_maintenance_page(array &$variables) {
+  $variables['logo'] = '/' . \Drupal::service('extension.list.theme')->getPath('creativefaze') . '/logo.png';
+  $variables['site_name'] = NULL;
+}
+
+function creativefaze_theme_suggestions_block_alter(array &$suggestions, array $variables, $hook) {
+  if ($variables['elements']['#derivative_plugin_id'] === '9669ef51-db63-425a-bf80-0474e0f0d063') {
+    $suggestions[] = $hook . '__principles';
+  }
+}
+
+function creativefaze_preprocess_item_list__search_results(array &$variables) {
+  $variables['topic'] = $_GET['keys'];
+  $itemsPerPage = 2;
+  $currentPage = (isset($_REQUEST['page']) ? $_REQUEST['page'] : 0) + 1;
+  $pager_manager = \Drupal::service('pager.manager');
+  $pager = $pager_manager->getPager();
+  $summary_message = NULL;
+  if ($pager) {
+    $pager_max = $pager->getTotalPages();
+    $current = $pager->getCurrentPage();
+    $total_items = $pager->getTotalItems();
+    $summary_message = t('@total_items found, showing @current of @pager_max', [
+      '@total_items' => $total_items,
+      '@current' => $current + 1,
+      '@pager_max' => $pager_max
+    ]);
+  }
+  $variables['summary_message'] = $summary_message;
+}
+
+function creativefaze_preprocess_search_result(array &$variables) {
+  $node = $variables['result']['node'];
+  $variables['info_split']['date'] = date('m/d/Y - H:i', $node->getChangedTime());
+}
+
+function creativefaze_preprocess_page_title(array &$variables) {
+  $route_name = \Drupal::routeMatch()->getRouteName();
+  if ($route_name === 'search.view_node_search') {
+    $variables['title'] = t('Search');
+  }
+}
+
+function creativefaze_preprocess_layout__twocol_section(array &$variables) {
+  $first = $variables['content']['first'];
+  $second = $variables['content']['second'];
+
+  $left = FALSE;
+  $right = FALSE;
+
+  foreach ($first as $subarray) {
+    if (isset($subarray['#theme'])) {
+      $left = TRUE;
+    }
+  }
+
+  foreach ($second as $subarray) {
+    if (isset($subarray['#theme'])) {
+      $right = TRUE;
+    }
+  }
+
+  $variables['half_class'] = '';
+  if ($left && $right) {
+    $variables['half_class'] = 'keep-half';
+  }
+}
